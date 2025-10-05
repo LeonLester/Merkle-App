@@ -1,18 +1,13 @@
 # Merkle-App
 
-# Databricks Notebook README
-
-"""
-# Price Distribution and Item View Analysis
-
-This notebook is implementing the solution for the assignment by Merkle for a Data Engineer position. It performs exploratory data analysis (EDA) on item price distributions and user view events using Spark DataFrames and Databricks visualizations.
+This notebook is implementing the solution for the assignment by Merkle for a Data Engineer position. It performs the required operations to get from the raw csv data provided to a gold datamart, as described in the assignment.
 
 ## Main Steps
 
 This dataset seems to be data derived from a webstore, for which we are asked to perform an analysis to provide dashboards for the owner (our client).
 
 1. **Fetching the files from S3**
-    Steps taken: 
+    Steps taken:
     1. Fetched the 2 csv files from the provided s3 bucket links.
     2. Performed analysis to understand their structure and what they represent.
     3. Passed them raw into my personal S3 bucket in the bronze layer.
@@ -22,17 +17,27 @@ This dataset seems to be data derived from a webstore, for which we are asked to
     - Standardized the attribute names in snake_case
     - Inferred the proper attribute types when possible. There are attributes whose value can be either a number or a string. Some can also be null.
     - The event.payload struct was flattened to the attributes contained within it.
-    #### Fact table 
+
+   ### Fact table
+
     It is derived from the **event** data, which contain the events that give us the information we need for the datamart later on.
     It was partitioned by year and month, filtered for the view_item events, which gives us the traffic data of the users to the items.
 
 3. **Datamart**
-    The top_item datamart was created by 
+    The top_item datamart was created by
+
+### Infrastructure
+
+I created:
+
+- a free account on Databricks
+- A free AWS account
+- an S3 bucket that I connected to DataBricks
+- a Unity Catalog that uses my AWS connection
 
 
-
-Extras:
-The steps that were done to get a better understanding of the item price distributions were:
+### Extras:
+The following steps are mentioned for reference. Their implementation is not in the submitted Notebook, to maintain a production-ready workflow.
 
     1. Visualized the distribution of item prices, including:
         - All prices
@@ -42,7 +47,7 @@ The steps that were done to get a better understanding of the item price distrib
         - Price quantiles and bucketization
         - Gaussian fit to price histogram
 Notes:
-Data seems to somewhat follow a Gaussian/zipfian distribution. 
+Data seems to somewhat follow a Gaussian/zipfian distribution.
 
 There are digital how-to manuals that are sold, along with the corresponding items, which skew the price distribution, creating a spike at 0.
 
@@ -53,8 +58,7 @@ There are digital how-to manuals that are sold, along with the corresponding ite
     - Joined item and event data to analyze item view counts and most used platforms.
     - Ranked items by total views per year.
 
-
-# Open Questions
+## Open Questions
 
 ## 1. What steps are missing to industrialize this solution?
 
@@ -77,11 +81,13 @@ There are digital how-to manuals that are sold, along with the corresponding ite
 Main difference: dbt only does transformation, not extraction. Need a separate ingestion process to load S3 files into Layer 1 (simple Spark job or tool like Fivetran).
 
 Architecture becomes:
+
 ```
 S3 → Ingestion job → Layer 1 → dbt → Layer 2 → Layer 3
 ```
 
 Extra resources needed:
+
 - Something to run dbt (VM or dbt Cloud)
 - Orchestrator to schedule dbt runs (Airflow/Databricks Workflows)
 - CI/CD pipeline for deployment
@@ -93,6 +99,7 @@ Can use Databricks SQL Warehouses instead of full clusters, which is cheaper for
 ## 3. What would dbt-core bring to the project? Pros and cons?
 
 **Pros:**
+
 - SQL-only transformations mean more people can contribute
 - Built-in testing framework is solid
 - Auto-generated documentation with lineage graphs
@@ -100,6 +107,7 @@ Can use Databricks SQL Warehouses instead of full clusters, which is cheaper for
 - Incremental models come out of the box
 
 **Cons:**
+
 - SQL only - complex logic or ML stuff still needs Spark
 - Another tool to learn and maintain
 - Need separate ingestion tooling
@@ -113,16 +121,19 @@ Use dbt if your transformations are mostly SQL-friendly. Stick with Spark if you
 **~2-3 weeks** for this case study.
 
 Week 1:
+
 - Setup dbt project and connections (1-2 days)
 - Build S3 ingestion job for Layer 1 (1 day)
 - Create Layer 2 staging models (2-3 days)
 
 Week 2:
+
 - Build Layer 3 top_item mart (2 days)
 - Testing and validation (1-2 days)
 - CI/CD setup and documentation (1-2 days)
 
 Add extra time if:
+
 - Team is new to dbt (+3-5 days learning curve)
 - Performance tuning needed (+1-2 days)
 - Complex integration issues (+2-3 days)
